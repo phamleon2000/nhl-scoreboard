@@ -1,0 +1,51 @@
+name: Update NHL Scoreboard
+
+# Runs the same updater as "Update NHL Scoreboard.bat" in the cloud, then publishes the
+# site to the Cloudflare worker nhl-picks. History files live on the "data" branch
+# (one commit, replaced each run), like College Football. Your PC doesn't need to be on.
+on:
+  schedule:
+    - cron: '17 * * * *'            # every hour, around the clock
+  workflow_dispatch:
+
+concurrency:
+  group: nhl-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore saved data
+        shell: pwsh
+        run: |
+          git fetch --depth 1 origin data
+          if ($LASTEXITCODE -ne 0) { throw 'The data branch is missing.' }
+          git checkout origin/data -- .
+          git reset -q
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run the update
+        shell: pwsh
+        run: |
+          ./update-nhl.ps1 *>&1 | Tee-Object last-update.log
+          if (-not (Test-Path 'NHL Scoreboard Mobile.html')) { throw 'The page was not built.' }
+
+      - name: Publish the site
+        shell: pwsh
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: ./online/publish.ps1
+
+      - name: Save data
+        if: ${{ always() }}
+        shell: pwsh
+        run: ./online/save-data.ps1

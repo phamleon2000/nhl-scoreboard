@@ -1,0 +1,9 @@
+{
+  "name": "nhl-picks",
+  "account_id": "ba002f4232a5dfc509110ef4ec5a0658",
+  "compatibility_date": "2026-11-01",
+  "assets": {
+    "directory": "./public"
+  },
+  "workers_dev": true
+}

@@ -1,0 +1,19 @@
+# Data files live on the "data" branch (see online/save-data.ps1)
+*.json
+!online/*.json
+maddux-live.js
+
+# Built pages and local-only files
+NHL Scoreboard.html
+NHL Scoreboard Mobile.html
+online/public/
+online/.wrangler/
+online/index.html
+online/mobile.html
+online/_headers
+.wrangler/
+node_modules/
+*.bak*
+*.log
+*.orig
+online-enabled.txt
