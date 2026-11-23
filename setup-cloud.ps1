@@ -6,6 +6,11 @@ $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) { throw 'git is not installed.' }
 if (-not (Test-Path '.git')) { git init -b main | Out-Null }
+# create the public GitHub repo with the GitHub CLI (signed in as phamleon2000) if it doesn't exist yet
+if (Get-Command gh -ErrorAction SilentlyContinue) {
+  gh repo view phamleon2000/nhl-scoreboard *> $null
+  if ($LASTEXITCODE) { gh repo create phamleon2000/nhl-scoreboard --public --description 'NHL scoreboard auto update'; if ($LASTEXITCODE) { throw 'Could not create the GitHub repo.' } }
+}
 if (-not (git remote)) { git remote add origin $Repo } else { git remote set-url origin $Repo }
 git config user.name 'leon pham'
 git config user.email '200858270+leonpham74@users.noreply.github.com'
